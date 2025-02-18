@@ -1,101 +1,170 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { api } from '@/services/api';
+import { Category, FormData } from '@/types/inspection';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [formData, setFormData] = useState<FormData>({});
+  const [loading, setLoading] = useState(true);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const data = await api.getCategories();
+      setCategories(data);
+      
+      // Initialize form data
+      const initialFormData: FormData = {};
+      data.forEach(category => {
+        category.items.forEach(item => {
+          initialFormData[item.id] = {
+            status: 'no',
+            comments: ''
+          };
+        });
+      });
+      setFormData(initialFormData);
+      setError(null);
+    } catch (err) {
+      setError('Error loading categories. Please try again.');
+      console.error('Error fetching categories:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusChange = (itemId: number, status: 'yes' | 'no' | 'neutral') => {
+    setFormData(prev => ({
+      ...prev,
+      [itemId]: {
+        ...prev[itemId],
+        status
+      }
+    }));
+  };
+
+  const handleCommentChange = (itemId: number, comment: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [itemId]: {
+        ...prev[itemId],
+        comments: comment
+      }
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitLoading(true);
+    setError(null);
+
+    try {
+      const items = Object.entries(formData).map(([checklistItemId, data]) => ({
+        checklistItemId: parseInt(checklistItemId),
+        ...data
+      }));
+
+      const response = await api.submitInspection({ items });
+
+      alert(`Inspection completed!\nTotal Score: ${response.percentage.toFixed(2)}%`);
+      // Reset form
+      fetchCategories();
+    } catch (err) {
+      setError('Error submitting inspection. Please try again.');
+      console.error('Error submitting inspection:', err);
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-gray-50 py-8">
+      <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-4">
+        <h1 className="text-3xl font-bold mb-8 text-gray-800">Inspection Checklist</h1>
+        
+        {error && (
+          <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-md">
+            {error}
+          </div>
+        )}
+        
+        {categories.map(category => (
+          <div key={category.id} className="mb-8 bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-6 text-gray-700">{category.name}</h2>
+            
+            {category.items.map(item => (
+              <div key={item.id} className="mb-6 border-b pb-4">
+                <p className="mb-3 font-medium text-gray-600">{item.description}</p>
+                
+                <div className="flex flex-wrap gap-6 mb-3">
+                  {(['yes', 'neutral', 'no'] as const).map((status) => (
+                    <label key={status} className="flex items-center cursor-pointer group">
+                      <input
+                        type="radio"
+                        name={`status-${item.id}`}
+                        checked={formData[item.id]?.status === status}
+                        onChange={() => handleStatusChange(item.id, status)}
+                        className="mr-2 h-4 w-4 text-blue-600"
+                      />
+                      <span className="group-hover:text-blue-600">
+                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                        {' '}
+                       
+                      </span>
+                      {/* ({status === 'yes' ? '2' : status === 'neutral' ? '1' : '0'} marks) */}
+                    </label>
+                  ))}
+                </div>
+                
+                <textarea
+                  value={formData[item.id]?.comments || ''}
+                  onChange={(e) => handleCommentChange(item.id, e.target.value)}
+                  placeholder="Add comments here..."
+                  className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  rows={2}
+                />
+              </div>
+            ))}
+          </div>
+        ))}
+        
+        <button
+          type="submit"
+          disabled={submitLoading}
+          className={`
+            w-full py-3 px-4 rounded-md text-white font-medium
+            ${submitLoading 
+              ? 'bg-blue-400 cursor-not-allowed' 
+              : 'bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50'
+            }
+            transition-colors duration-200
+          `}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          {submitLoading ? (
+            <span className="flex items-center justify-center">
+              <span className="animate-spin h-5 w-5 mr-3 border-2 border-white border-t-transparent rounded-full"></span>
+              Submitting...
+            </span>
+          ) : (
+            'Submit Inspection'
+          )}
+        </button>
+      </form>
+    </main>
   );
 }
