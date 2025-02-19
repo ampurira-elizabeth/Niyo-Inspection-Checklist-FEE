@@ -13,5 +13,13 @@ export const api = {
   submitInspection: async (data: InspectionSubmission): Promise<InspectionResponse> => {
     const response = await axios.post<InspectionResponse>(`${API_BASE_URL}/submit`, data);
     return response.data;
+  },
+
+  addToolsEquipment: async (data: { description: string[] }): Promise<any> => {
+    const response = await axios.post(`${API_BASE_URL}/tools/equipments`, data);
+    console.log("📡 Tools & Equipment Response:", response.data);
+    return response.data;
   }
+
+  
 };
