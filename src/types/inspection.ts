@@ -13,17 +13,14 @@ export interface Category {
   }
   
   export interface FormData {
-    garage_name: string;            // New field for Garage Name
-    contact_person_tel: string;     // New field for Contact Person/Tel
-    physical_location: string;       // New field for Physical Location
+    garage_name: string;            
+    contact_person_tel: string;     
+    physical_location: string;       
     [key: number]: {
         status: 'yes' | 'no' | 'neutral';
         comments: string;
     };
-    // [key: number]: {
-    //   status: 'yes' | 'no' | 'neutral';
-    //   comments: string;
-    // };
+  
   }
   
   export interface InspectionSubmission {
@@ -35,12 +32,7 @@ export interface Category {
         status: 'yes' | 'no' | 'neutral';
         comments: string;
     }[];
-    // items: {
 
-    //   checklistItemId: number;
-    //   status: 'yes' | 'no' | 'neutral';
-    //   comments: string;
-    // }[];
   }
   
   export interface InspectionResponse {
@@ -51,4 +43,14 @@ export interface Category {
     garage_name?: string;            
     contact_person_tel?: string;     
     physical_location?: string; 
+  }
+
+  export interface Inspection {
+    id: number | string;
+    garage_name: string;
+    date: string;
+    contact_person_tel: string;
+    physical_location: string;
+    total_score: number;
+    percentage: number;
   }

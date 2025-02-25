@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Category, InspectionSubmission, InspectionResponse } from '../types/inspection';
+import { Category, InspectionSubmission, InspectionResponse,Inspection } from '../types/inspection';
 
 const API_BASE_URL = 'http://localhost:3001/api';
 
@@ -19,7 +19,17 @@ export const api = {
     const response = await axios.post(`${API_BASE_URL}/tools/equipments`, data);
     console.log("📡 Tools & Equipment Response:", response.data);
     return response.data;
-  }
+  },
+
+  inspectionResults: async (): Promise<Inspection[]> => {
+    try {
+        const response = await axios.get<Inspection[]>(`${API_BASE_URL}/inspections`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching inspection results:", error);
+        throw error;
+    }
+}
 
   
 };

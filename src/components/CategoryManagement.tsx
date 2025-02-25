@@ -73,7 +73,7 @@ export default function AddCategoryForm() {
     
         try {
             console.log("📡 Sending request to add tools/equipment...");
-            const response = await api.addToolsEquipment(requestData); // ✅ Using new API wrapper
+            const response = await api.addToolsEquipment(requestData);
     
             console.log("✅ Response:", response);
     

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { api } from "@/services/api";
 import { Category, FormData } from "@/types/inspection";
 import AddCategoryForm from "@/components/CategoryManagement";
+import Link from "next/link";
 
 export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -98,25 +99,22 @@ export default function Home() {
   //     setSubmitLoading(false);
   //   }
   // };
- 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitLoading(true);
     setError(null);
 
     try {
-      // Create the items array from formData
       const items = Object.entries(formData).map(([checklistItemId, data]) => ({
         checklistItemId: parseInt(checklistItemId),
         ...data,
       }));
 
-      // Extract new fields from form data (assuming you have them in your form state)
-      const garage_name = formData.garage_name; // Replace with actual way to get this value
-      const contact_person_tel = formData.contact_person_tel; // Replace with actual way to get this value
-      const physical_location = formData.physical_location; // Replace with actual way to get this value
+      const garage_name = formData.garage_name;
+      const contact_person_tel = formData.contact_person_tel;
+      const physical_location = formData.physical_location;
 
-      // Send the complete submission object including the new fields
       const response = await api.submitInspection({
         garage_name,
         contact_person_tel,
@@ -154,7 +152,7 @@ export default function Home() {
           <div className="flex items-center justify-center mb-8">
             <div className="mr-4">
               <img
-                src="/public/globe.svg"
+                src="/public/niyo-logo.png"
                 alt="Logo"
                 width={100}
                 height={100}
@@ -168,6 +166,17 @@ export default function Home() {
               <p>www.nagoa.org</p>
             </div>
           </div>
+
+              {/* Link to Inspection Results Page */}
+              <div className="mt-6 text-center">
+                    <Link href="/inspections">
+                        <button type="button" className="px-4 py-2 bg-blue-600 text-white rounded-md">
+                            View Inspection Results
+                        </button>
+                    </Link>
+
+
+                    </div>
           {/* Name, Contact, and Location Fields */}
           <div className="space-y-4">
             <div>
@@ -184,7 +193,7 @@ export default function Home() {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter garage name"
                 required
-                value={formData.garage_name} // Bind the value to formData
+                value={formData.garage_name}
                 onChange={(e) =>
                   setFormData({ ...formData, garage_name: e.target.value })
                 } // Update the state
@@ -205,7 +214,7 @@ export default function Home() {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter contact information"
                 required
-                value={formData.contact_person_tel} // Bind the value to formData
+                value={formData.contact_person_tel}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -229,13 +238,13 @@ export default function Home() {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter physical location"
                 required
-                value={formData.physical_location} // Bind the value to formData
+                value={formData.physical_location}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
                     physical_location: e.target.value,
                   })
-                } // Update the state
+                }
               />
             </div>
           </div>
@@ -290,15 +299,16 @@ export default function Home() {
                       {/* ({status === 'yes' ? '2' : status === 'neutral' ? '1' : '0'} marks) */}
                     </label>
                   ))}
-                </div>
-
-                <textarea
+                  <textarea
                   value={formData[item.id]?.comments || ""}
                   onChange={(e) => handleCommentChange(item.id, e.target.value)}
                   placeholder="Add comments here..."
-                  className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-1/2 p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   rows={2}
                 />
+                </div>
+
+                
               </div>
             ))}
           </div>
@@ -307,7 +317,6 @@ export default function Home() {
         <div className="mb-4">
           <p>Which other Tools & Equipment would you want?</p>
 
-          {/* Button to toggle form */}
           <button
             type="button"
             onClick={() => setShowForm(!showForm)}
@@ -316,7 +325,6 @@ export default function Home() {
             {showForm ? "Close Form" : "Add"}
           </button>
 
-          {/* Render the form in a separate section */}
           {showForm && (
             <div className="mt-4 border p-4 rounded bg-gray-100">
               <AddCategoryForm />
