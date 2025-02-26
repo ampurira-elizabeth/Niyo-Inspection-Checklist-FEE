@@ -1,5 +1,5 @@
 // components/Sidebar.tsx
-import Link from 'next/link';
+import Link from "next/link";
 
 const Sidebar: React.FC = () => {
   return (
@@ -15,8 +15,15 @@ const Sidebar: React.FC = () => {
         </li>
         <li>
           <Link href="/inspections">
-            <button className="block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded transition duration-200">
+            <button className="block mt-4 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded transition duration-200">
               Inspections List
+            </button>
+          </Link>
+        </li>
+        <li>
+          <Link href="#">
+            <button className="block mt-4 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded transition duration-200">
+              Settings
             </button>
           </Link>
         </li>

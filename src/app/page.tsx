@@ -1,17 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { api } from "@/services/api";
-import { Category, FormData } from "@/types/inspection";
-import AddCategoryForm from "@/components/CategoryManagement";
-import Sidebar from "@/components/sideBar";
-import Link from "next/link";
 
-export default function Home() {
- 
+import Sidebar from "@/components/sideBar";
+
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+const Home: React.FC = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push("/inspections/inspectionform");
+  }, [router]);
+
   return (
-    <main className="min-h-screen bg-gray-50 py-8">
-      <Sidebar/>
+    <main className="min-h-screen bg-gray-50 py-8 flex">
+      <Sidebar />
     </main>
   );
-}
+};
+
+export default Home;
