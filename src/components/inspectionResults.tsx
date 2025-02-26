@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
-import { Inspection } from '../types/inspection';
-
+import { Inspection } from "../types/inspection";
+import Layout from "../components/Layout";
 
 const Inspections = () => {
-//   const [inspections, setInspections] = useState(Inspection[]);
-const [inspections, setInspections] = useState<Inspection[]>([]);
+  //   const [inspections, setInspections] = useState(Inspection[]);
+  const [inspections, setInspections] = useState<Inspection[]>([]);
   const [loading, setLoading] = useState(true);
 
   const formatDate = (dateString: string): string => {
@@ -18,7 +18,6 @@ const [inspections, setInspections] = useState<Inspection[]>([]);
     // Return the original string if it's not a valid date
     return dateString;
   };
-  
 
   useEffect(() => {
     const fetchInspections = async () => {
@@ -35,17 +34,55 @@ const [inspections, setInspections] = useState<Inspection[]>([]);
     fetchInspections();
   }, []);
 
-  const handlePrint = () => {
-    window.print();
+  // const handlePrint = () => {
+  //   window.print();
+  // };
+  const handlePrint = async () => {
+    try {
+      const blob = await api.printInspections(); // Get the Blob directly
+  
+      if (!blob) {
+        throw new Error("Failed to download PDF");
+      }
+  
+      const url = window.URL.createObjectURL(blob);
+  
+      // Create a temporary link to trigger download
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "inspections.pdf";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+  
+      // Release the object URL
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+    }
   };
+
   if (loading) {
     return <p className="text-center text-gray-500">Loading inspections...</p>;
   }
 
   return (
+    <Layout>
     <div>
-      {/* <h1>Inspection Reports</h1> */}
-      <button style={{background:"blue", padding:"10px", margin:"10px", border:"1px solid", borderRadius:"4px", color: "white"}} onClick={handlePrint}>Print</button>
+    <h1 className="text-center text-2xl font-bold">Inspection Results</h1>
+      <button
+        style={{
+          background: "blue",
+          padding: "10px",
+          margin: "10px",
+          border: "1px solid",
+          borderRadius: "4px",
+          color: "white",
+        }}
+        onClick={handlePrint}
+      >
+        Print
+      </button>
 
       {inspections.length === 0 ? (
         <p>Loading...</p>
@@ -124,8 +161,6 @@ const [inspections, setInspections] = useState<Inspection[]>([]);
             </thead>
             <tbody>
               {inspections.map((inspection) => (
-
-                
                 <tr
                   key={inspection.id}
                   style={{ borderBottom: "1px solid #ddd" }}
@@ -167,6 +202,7 @@ const [inspections, setInspections] = useState<Inspection[]>([]);
         </div>
       )}
     </div>
+    </Layout>
   );
 };
 

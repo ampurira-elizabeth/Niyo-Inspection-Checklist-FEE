@@ -29,6 +29,22 @@ export const api = {
         console.error("Error fetching inspection results:", error);
         throw error;
     }
+},
+printInspections: async (): Promise<Blob> => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/inspections/pdf`, {
+      responseType: "blob",
+    });
+
+    if (!response.data) {
+      throw new Error("Failed to download PDF");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching PDF:", error);
+    throw error;
+  }
 }
 
   
