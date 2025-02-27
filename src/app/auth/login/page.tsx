@@ -7,28 +7,51 @@ import { useRouter } from "next/navigation";
 import Link from 'next/link';
 import AuthContext from '../../../components/AuthContext';
 import Layout from '../../../components/Layout';
+import { api } from '@/services/api';
+import { UserLoginData } from '@/types/user';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  
+  const [formError, setFormError] = useState<string>('');
+
   const { login, error, isAuthenticated } = useContext(AuthContext);
   const router = useRouter();
   
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/dashboard');
+      router.push('/inspections/inspectionform');
     }
   }, [isAuthenticated, router]);
   
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit2 = (e: FormEvent) => {
     e.preventDefault();
     login({ email, password });
+  };
+
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+  
+    try {
+      const userData: UserLoginData = { email, password };
+      const response = await api.loginUser(userData); 
+  
+      console.log("Login successful:", response);
+      if (response.token) {
+        localStorage.setItem("authToken", response.token);
+        localStorage.setItem("isRegistered", "true"); 
+      }
+        router.push("/inspections/inspectionform");
+      
+    } catch (error: any) {
+      setFormError(error.message || "Login failed. Please try again.");
+    }
   };
   
   return (
     <Layout>
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md mx-auto justify-center mt-40">
         <h1 className="text-2xl font-bold mb-4">Login</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

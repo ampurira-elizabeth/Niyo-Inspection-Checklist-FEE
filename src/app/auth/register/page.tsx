@@ -7,6 +7,9 @@ import { useRouter } from "next/navigation";
 import Link from 'next/link';
 import AuthContext from '../../../components/AuthContext';
 import Layout from '../../../components/Layout';
+import { UserData } from '@/types/user';
+import { api } from "@/services/api";
+
 
 const RegisterPage: React.FC = () => {
   const [name, setName] = useState<string>('');
@@ -20,11 +23,11 @@ const RegisterPage: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/dashboard');
+      router.push('/inspections/inspectionform');
     }
   }, [isAuthenticated, router]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit2 = (e: FormEvent) => {
     e.preventDefault();
 
     if (password !== passwordConfirm) {
@@ -35,9 +38,30 @@ const RegisterPage: React.FC = () => {
     register({ name, email, password });
   };
 
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+  
+    if (password !== passwordConfirm) {
+      setFormError("Passwords do not match");
+      return;
+    }
+  
+    try {
+      const userData: UserData = { name, email, password };
+  
+      const response = await api.registerUser(userData);
+  
+      console.log("User registered successfully:", response);
+      // Handle success (e.g., redirect, show message, etc.)
+  
+    } catch (error: any) {
+      setFormError(error.message || "Registration failed. Please try again.");
+    }
+  };
+
   return (
     <Layout>
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md mx-auto justify-center mt-40">
         <h1 className="text-2xl font-bold mb-4">Register</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

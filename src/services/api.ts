@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Category, InspectionSubmission, InspectionResponse,Inspection } from '../types/inspection';
+import { UserData, UserLoginData } from '@/types/user';
 
 const API_BASE_URL = 'http://localhost:3001/api';
 
@@ -45,7 +46,34 @@ printInspections: async (): Promise<Blob> => {
     console.error("Error fetching PDF:", error);
     throw error;
   }
-}
+},
 
+registerUser: async (userData: UserData): Promise<any> => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/auth/register`, userData, {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    return response.data; 
+  } catch (error: any) {
+    console.error("Failed to add user:", error.response?.data || error.message);
+
+    throw new Error(error.response?.data?.message || "Registration failed. Please try again.");
+  }
+},
+loginUser: async (userData: UserLoginData): Promise<any> => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/auth/login`, userData, {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    return response.data;
+
+  } catch (error: any) {
+    console.error("Failed to login user:", error.response?.data || error.message);
+
+    throw new Error(error.response?.data?.message || "Login failed. Please try again.");
+  }
+}
   
 };
